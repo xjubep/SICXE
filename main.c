@@ -2,16 +2,24 @@
 #include <string.h> // strcmp
 #include <stdlib.h>
 #include "shell.h" // exit
+#include "list.h"
 
 int main(void) {
-    char cmd_line[4*21];
-    char cmd[4][21];
-    int cmd_num;
+    char cmd_line[4*MX_CMD_LEN];
+    char cmd[4][MX_CMD_LEN];
+    int cmd_num, cmd_idx = 0;
+    List *hi = (List *)malloc(sizeof(List));
+    hi->size = 0;
+    hi->front = NULL;
+    hi->back = NULL;
 
     while (1) {
         printf("sicsim> ");
         fgets(cmd_line, sizeof(cmd_line), stdin);
         cmd_num = sscanf(cmd_line, "%s %s %s %s", cmd[0], cmd[1], cmd[2], cmd[3]);
+        cmd_idx++;
+
+        push_back(hi, cmd_line);
 
         if (strcmp(cmd[0], "h") == 0 || strcmp(cmd[0], "help") == 0) {
             help();
@@ -23,7 +31,11 @@ int main(void) {
             quit();
         }
         else if (strcmp(cmd[0], "hi") == 0 || strcmp(cmd[0], "history") == 0) {
-            history();
+            node_ptr cur = hi->front;
+            for (int i = 0; i < cmd_idx; i++) {
+                printf("%5d %s", i+1, cur->data);
+                cur = cur->next;
+            }
         }
         else if (strcmp(cmd[0], "du") == 0 || strcmp(cmd[0], "dump") == 0) {
             dump(cmd_num, cmd);
@@ -47,6 +59,11 @@ int main(void) {
         }
         else if (strcmp(cmd[0], "opcodelist") == 0) {
             printf("opcodelist\n");
+        }
+        else {
+            // 잘못된 명령어가 입력된 경우, 히스토리 리스트에서 삭제
+            pop_back(hi);
+            cmd_idx--;
         }
     }
 
