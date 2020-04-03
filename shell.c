@@ -60,20 +60,3 @@ void dir(void) {
 void quit(void) {
     exit(0);
 }
-
-void history(int cmd_idx, char cmd_line[4*MX_CMD_LEN]) {
-    printf("history\n");
-    
-}
-
-void dump(int cmd_num, char** cmd) {
-    if (cmd_num == 1) {
-        printf("dump\n");
-    }
-    else if (cmd_num == 2) {
-        printf("dump start\n");
-    }  
-    else if (cmd_num == 3) {
-        printf("dump start, end\n");
-    }
-}

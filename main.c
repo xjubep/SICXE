@@ -4,6 +4,7 @@
 #include "shell.h" // exit
 #include "list.h"
 #include "opcode.h"
+#include "memory.h"
 
 int main(void) {
     char cmd_line[4*MX_CMD_LEN];
@@ -68,21 +69,28 @@ int main(void) {
             }
         }
         else if (strcmp(cmd[0], "du") == 0 || strcmp(cmd[0], "dump") == 0) {
-            dump(cmd_num, cmd);
+            if (dump(cmd_num, cmd[1], cmd[2]) == 0) {
+                printf("dump error!\n");
+                pop_back(hi);
+                cmd_idx--;                
+            }
         }
         else if (strcmp(cmd[0], "e") == 0 || strcmp(cmd[0], "edit") == 0) {
-            printf("edit\n");
-            printf("address: %s\n", cmd[1]);
-            printf("value: %s\n", cmd[2]);
+            if (edit(cmd[1], cmd[2]) == 0) {
+                printf("edit error!\n");
+                pop_back(hi);
+                cmd_idx--;                
+            }
         }
         else if (strcmp(cmd[0], "f") == 0 || strcmp(cmd[0], "fill") == 0) {
-            printf("fill\n");
-            printf("start: %s\n", cmd[1]);
-            printf("end: %s\n", cmd[2]);
-            printf("value: %s\n", cmd[3]);
+            if (fill(cmd[1], cmd[2], cmd[3]) == 0) {
+                printf("fill error!\n");
+                pop_back(hi);
+                cmd_idx--;                
+            }
         }
         else if (strcmp(cmd[0], "reset") == 0) {
-            printf("reset\n");
+            reset();
         }
         else if (strcmp(cmd[0], "opcode") == 0) {
             if(op_find(cmd[1]) == 0) { // opcode.txt에 존재하지 않을 경우

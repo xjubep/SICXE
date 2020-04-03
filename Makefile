@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=-g -Wall
-OBJS=main.o shell.o list.o opcode.o
+OBJS=main.o shell.o list.o opcode.o memory.o
 TARGET=a.out
 
 all: $(TARGET)
@@ -12,7 +12,8 @@ clean:
 $(TARGET): $(OBJS)
 	$(CC) -o $@ $(OBJS)
 
-main.o: main.c shell.h shell.c list.h list.c opcode.h opcode.c
+main.o: main.c shell.h shell.c list.h list.c opcode.h opcode.c memory.h memory.c
 shell.o: shell.h shell.c
 list.o: list.h list.c
 opcode.o: opcode.h opcode.c
+memory.o: memory.h memory.c
