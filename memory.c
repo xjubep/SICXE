@@ -101,6 +101,14 @@ int fill(char* s, char *e, char *v) {
     if (val < 0x20 || val > 0x7E)
         return 0;
 
+    /* start 주소값이 메모리 범위를 벗어난 경우 error 처리 (false) */
+    if (start > 0xFFFFF)
+        return 0;    
+
+    /* start 주소가 end 주소보다 큰 값이 들언온 경우 error 처리 (false)*/
+    if (start > end) 
+        return 0;     
+
     for (unsigned int addr = start; addr <= end; addr++) {
         /* address 값이 범위를 벗어난 경우 error 처리 */
         if (addr > 0xFFFFF) 
