@@ -30,7 +30,7 @@ int dump(int cmd_num, char* s, char* e) {
     }
 
     /* start 주소값이 메모리 범위를 벗어난 경우 error 처리 (false) */
-    if (start > 0xFFFFF || start < 0x00000)
+    if (start > 0xFFFFF)
         return 0;    
 
     /* start 주소가 end 주소보다 큰 값이 들언온 경우 error 처리 (false)*/
@@ -45,7 +45,7 @@ int dump(int cmd_num, char* s, char* e) {
     if (tmp_end > 0xFFFFF)
         tmp_end = 0xFFFFF;
 
-    for (int addr = tmp_start; addr < tmp_end; addr += 16) {
+    for (unsigned int addr = tmp_start; addr < tmp_end; addr += 16) {
         printf("%05X ", addr);
 
         for (int i = 0; i < 16; i++) {
@@ -82,7 +82,7 @@ int edit(char* a, char* v) {
         return 0;
 
     /* address 값이 범위를 벗어난 경우 error 처리 */
-    if (addr < 0x00000 || addr > 0xFFFFF)
+    if (addr > 0xFFFFF)
         return 0;
 
     mem[addr] = (char)val;
@@ -103,7 +103,7 @@ int fill(char* s, char *e, char *v) {
 
     for (unsigned int addr = start; addr <= end; addr++) {
         /* address 값이 범위를 벗어난 경우 error 처리 */
-        if (addr < 0x00000 || addr > 0xFFFFF) 
+        if (addr > 0xFFFFF) 
             return 0;         
         mem[addr] = (char)val;
     }

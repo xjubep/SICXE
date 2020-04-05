@@ -1,19 +1,12 @@
 CC=gcc
-CFLAGS=-g -Wall
-OBJS=main.o shell.o list.o opcode.o memory.o
+CFLAGS=-Wall -W
+SOURCES=main.c shell.c list.c opcode.c memory.c
 TARGET=a.out
 
 all: $(TARGET)
 
 clean:
-	rm -f *.o
 	rm -f $(TARGET)
 
-$(TARGET): $(OBJS)
-	$(CC) -o $@ $(OBJS)
-
-main.o: main.c shell.h shell.c list.h list.c opcode.h opcode.c memory.h memory.c
-shell.o: shell.h shell.c
-list.o: list.h list.c
-opcode.o: opcode.h opcode.c
-memory.o: memory.h memory.c
+$(TARGET): $(SOURCES)
+	$(CC) $(CFLAGS) -o $(TARGET) $(SOURCES)
