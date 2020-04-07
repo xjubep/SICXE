@@ -5,6 +5,7 @@
 #include "list.h"
 #include "opcode.h"
 #include "memory.h"
+#include "assemble.h"
 
 int main(void) {
     char cmd_line[4*MX_CMD_LEN];    // 명령어 한 줄 전체를 저장하는 변수
@@ -116,6 +117,30 @@ int main(void) {
         else if (strcmp(cmd[0], "opcodelist") == 0) {
             /* opcodelist command를 입력받으면 op_print_all 함수 호출 */
             op_print_all();
+        }
+        else if (strcmp(cmd[0], "type") == 0) {
+            /* type command를 입력받으면 type 함수 호출 */
+            if (cmd_num != 2 || type(cmd[1]) == 0) {
+                /* 잘못된 command가 입력 된 경우이므로 history linked list에서 삭제 */
+                printf("type error!\n");
+                pop_back(hi);
+            }
+        }
+        else if (strcmp(cmd[0], "assemble") == 0) {
+            /* assemble command를 입력받으면 assemble 함수 호출 */
+            if (cmd_num != 2 || assemble(cmd[1]) == 0) {
+                /* 잘못된 command가 입력 된 경우이므로 history linked list에서 삭제 */
+                printf("assemble error!\n");
+                pop_back(hi);
+            }          
+        }
+        else if (strcmp(cmd[0], "symbol") == 0) {
+            /* symbol command를 입력받으면 symbol 함수 호출 */
+            if (cmd_num != 1 || symbol() == 0) {
+                /* 잘못된 command가 입력 된 경우이므로 history linked list에서 삭제 */
+                printf("symbol error!\n");
+                pop_back(hi);
+            }          
         }
         else {
             /* 정의되지 않은 command가 입력된 경우이므로 history linked list에서 삭제 */

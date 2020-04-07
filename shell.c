@@ -18,6 +18,9 @@ void help(void) {
     printf("reset\n");
     printf("opcode mnemonic\n");
     printf("opcodelist\n");
+    printf("assemble filename\n");
+    printf("type filename\n");
+    printf("symbol\n");
 }
 
 /*  
@@ -72,4 +75,21 @@ void dir(void) {
 /* shell sicsim을 종료하는 함수 */
 void quit(void) {
     exit(0);
+}
+
+/* filename에 해당하는 파일을 현재 디렉토리에서 읽어서 화면에 출력함 */
+int type(char *filename) {
+    char buf[1024];
+    FILE *fp = fopen(filename, "r");
+
+    if (!fp) {
+        return 0;        
+    }
+
+    while (fgets(buf, sizeof(buf), fp))
+        fputs(buf, stdout);
+    
+    fclose(fp);
+
+    return 1;
 }

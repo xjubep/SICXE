@@ -7,5 +7,6 @@
 void help(void);
 void dir(void);
 void quit(void);
+int type(char *filename);
 
 #endif
