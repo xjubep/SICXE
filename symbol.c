@@ -49,24 +49,36 @@ int sym_find(const char *label) {
 
 /* 전체 symbol list 출력 */
 int sym_print_all(void) {
-    //sym_node_ptr all_list[1000] = {0, };
+    sym_node_ptr all_list[1000];
+    int cnt = 0;
 
     for (int i = 0; i < TABLE_SIZE; i++) {
         if (sym_table[i] != NULL) {
-            printf("%2d: ", i);
             sym_node_ptr cur = sym_table[i];
-            while (cur->next != NULL) {
-                printf("[%s, %04X] -> ", cur->label, cur->LOCCTR);
+
+            while (cur != NULL) {
+                sym_node_ptr new_node = (sym_node_ptr)malloc(sizeof(SYM_NODE));
+
+                strcpy(new_node->label, cur->label);
+                new_node->LOCCTR = cur->LOCCTR;
+                new_node->next = NULL;
+                all_list[cnt] = new_node;
+
                 cur = cur->next;
+                cnt++;
             }
-            printf("[%s, %04X]\n", cur->label, cur->LOCCTR);
         }
+    }
+    qsort(all_list, cnt, sizeof(sym_node_ptr), sym_compare);
+    for (int i = 0; i < cnt; i++) {
+        printf("%7s %-10s %04X\n", "", all_list[i]->label, all_list[i]->LOCCTR);
     }
     return 1;
 }
 
-/*  assemble 과정 중에 생성된 symbol table을 화면에 출력함
-    symbol table은 각자 알아서 설계함
-    가장 최근에 assemble한 파일의 symbol table을 출력함
-    symbol의 출력은 symbol을 기준으로 알파벳 내림차순으로 정렬
-*/
+/* qsort함수에 사용될 정렬 함수 */
+int sym_compare(const void *a, const void *b) {
+    sym_node_ptr n1 = *(sym_node_ptr *)a;
+    sym_node_ptr n2 = *(sym_node_ptr *)b;
+    return strcmp(n1->label, n2->label);
+}
