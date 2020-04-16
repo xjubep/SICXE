@@ -56,10 +56,10 @@ int sym_print_all(void) {
             printf("%2d: ", i);
             sym_node_ptr cur = sym_table[i];
             while (cur->next != NULL) {
-                printf("[%s, %02X] -> ", cur->label, cur->LOCCTR);
+                printf("[%s, %04X] -> ", cur->label, cur->LOCCTR);
                 cur = cur->next;
             }
-            printf("[%s, %02X]\n", cur->label, cur->LOCCTR);
+            printf("[%s, %04X]\n", cur->label, cur->LOCCTR);
         }
     }
     return 1;

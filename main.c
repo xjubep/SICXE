@@ -109,14 +109,14 @@ int main(void) {
             reset();
         }
         else if (strcmp(cmd[0], "opcode") == 0) {
-            int flag = op_find(cmd[1]);
-            if (cmd_num != 2 || flag == -1) {
+            op_node_ptr tmp = op_find(cmd[1]);
+            if (cmd_num != 2 || tmp == NULL) {
                 /* 잘못된 command가 입력된 경우이므로 history linked list에서 삭제 */
                 printf("opcode find error!\n");
                 pop_back(hi);
             }
             else {
-                printf("opcode is %02X\n", flag);
+                printf("opcode is %02X\n", tmp->value);
             }
         }
         else if (strcmp(cmd[0], "opcodelist") == 0) {

@@ -18,7 +18,7 @@ op_node_ptr table[TABLE_SIZE];  // opcode를 저장할 hash table 포인터 변�
 
 int hash(const char* str);      // 문자열에 따른 해시값을 생성하는 함수
 void op_insert(int value, const char *name, int format); // linked list 기반의 hash table에 opcode를 삽입하는 함수
-int op_find(const char *name);  // instruction name과 일치하는 ocpode가 존재하는지 확인하는 함수
+op_node_ptr op_find(const char *name);  // instruction name과 일치하는 ocpode가 존재하는지 확인하는 함수
 void op_print_all(void);        // 전체 opcodelist 출력
 
 #endif

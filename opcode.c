@@ -36,17 +36,17 @@ void op_insert(int value, const char *name, int format) {
 }
 
 /* instruction name과 일치하는 ocpode가 존재하는지 확인하는 함수 */
-int op_find(const char *name) {
+op_node_ptr op_find(const char *name) {
     int idx = hash(name);
     op_node_ptr cur = table[idx];
 
     while (cur != NULL) {
         if (strcmp(cur->name, name) == 0) {
-            return cur->value;
+            return cur;
         }
         cur = cur->next;
     }
-    return -1;
+    return NULL;
 }
 
 /* 전체 opcodelist 출력 */
