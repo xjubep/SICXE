@@ -6,6 +6,7 @@
 #include "opcode.h"
 #include "memory.h"
 #include "assemble.h"
+#include "symbol.h"
 
 int main(void) {
     char cmd_line[4*MX_CMD_LEN];    // 명령어 한 줄 전체를 저장하는 변수
@@ -108,10 +109,14 @@ int main(void) {
             reset();
         }
         else if (strcmp(cmd[0], "opcode") == 0) {
-            if(cmd_num != 2 || op_find(cmd[1]) == 0) {
+            int flag = op_find(cmd[1]);
+            if (cmd_num != 2 || flag == -1) {
                 /* 잘못된 command가 입력된 경우이므로 history linked list에서 삭제 */
                 printf("opcode find error!\n");
                 pop_back(hi);
+            }
+            else {
+                printf("opcode is %02X\n", flag);
             }
         }
         else if (strcmp(cmd[0], "opcodelist") == 0) {
@@ -136,7 +141,7 @@ int main(void) {
         }
         else if (strcmp(cmd[0], "symbol") == 0) {
             /* symbol command를 입력받으면 symbol 함수 호출 */
-            if (cmd_num != 1 || symbol() == 0) {
+            if (cmd_num != 1 || sym_print_all() == 0) {
                 /* 잘못된 command가 입력 된 경우이므로 history linked list에서 삭제 */
                 printf("symbol error!\n");
                 pop_back(hi);

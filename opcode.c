@@ -37,19 +37,16 @@ void op_insert(int value, const char *name, int format) {
 
 /* instruction name과 일치하는 ocpode가 존재하는지 확인하는 함수 */
 int op_find(const char *name) {
-    int find = 0;   // find default: 0
     int idx = hash(name);
     op_node_ptr cur = table[idx];
 
     while (cur != NULL) {
         if (strcmp(cur->name, name) == 0) {
-            printf("opcode is %02X\n", cur->value);
-            find = 1;
-            return find;
+            return cur->value;
         }
         cur = cur->next;
     }
-    return find;
+    return -1;
 }
 
 /* 전체 opcodelist 출력 */

@@ -2,6 +2,6 @@
 #define __ASSEMBLE_H
 
 int assemble(char *filename);
-int symbol(void);
+int pass1(char *asm_filename, char *mid_filename);
 
 #endif
