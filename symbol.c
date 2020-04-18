@@ -33,7 +33,7 @@ void sym_insert(const char *label, unsigned int LOCCTR) {
     }
 }
 
-/* label 일치하는 symbol 존재하는지 확인하는 함수 */
+/* label 일치하는 symbol의 LOCCTR 반환하는 함수, 없으면 -1 반환 */
 int sym_find(const char *label) {
     int idx = sym_hash(label);
     sym_node_ptr cur = sym_table[idx];

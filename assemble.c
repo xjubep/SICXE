@@ -6,6 +6,8 @@
 #include "symbol.h"
 
 int LOCCTR = 0;
+int program_len = -1;
+state_info tmp[500];
 
 /*  filename에 해당하는 소스 파일(*.asm)을 읽어서 
     object 파일(*.obj)과 리스팅 파일(*.lst)을 만든다. 
@@ -36,7 +38,12 @@ int assemble(char *filename) {
     strcat(mid_filename, ".mid");
 
     /* pass1 수행, 성공: program len, 실패:-1 리턴 */
-    if (pass1(asm_filename, mid_filename) == -1) {
+    program_len = pass1(asm_filename, mid_filename);
+    if (program_len == -1) {
+        return 0;
+    }
+
+    if (pass2(mid_filename, lst_filename, obj_filename) == -1) {
         return 0;
     }
 
@@ -47,39 +54,53 @@ state_info get_statement_info(char *statement) {
     state_info tmp;
     tmp.token_num = sscanf(statement, "%s %s %s %s", tmp.token[0], tmp.token[1], tmp.token[2], tmp.token[3]);
 
-    /* start행은 따로 처리할 거임 */
-    /*  첫 번째 토큰이 opcode list에 존재하지 않으면서
-        token의 개수가 3개인 경우 symbol이 있는 statement로 간주 */
+    if (statement[0] == '.') {
+        tmp.is_comment = 1;
+        strcpy(tmp.statement, statement);
+        tmp.statement[strlen(tmp.statement)-1] = '\0';
+    }
+    else {
+        tmp.is_comment = 0;
+        /* start행은 따로 처리할 거임 */
 
-    if (tmp.token_num == 3 && op_find(tmp.token[0]) == NULL) {
-        strcpy(tmp.symbol, tmp.token[0]);
-        strcpy(tmp.opcode, tmp.token[1]);
-        strcpy(tmp.operand, tmp.token[2]);
+        /*  첫 번째 토큰이 opcode list에 존재하지 않으면서
+            token의 개수가 3개인 경우 symbol이 있는 statement로 간주 */
+        if (tmp.token_num == 3 && op_find(tmp.token[0]) == NULL) {
+            // START일 경우에는 symbol에 집어 넣지 않음
+            if (strcmp(tmp.token[1], "START") == 0)
+                return tmp; 
+            strcpy(tmp.symbol, tmp.token[0]);
+            strcpy(tmp.opcode, tmp.token[1]);
+            strcpy(tmp.operand, tmp.token[2]);
+            strcpy(tmp.operand2, tmp.token[3]);
 
-        if (sym_find(tmp.symbol) != -1) {
-            /* SYMTAB에서 symbol을 찾으면 error flag */
-            fprintf(stderr, "[ERROR] duplicate symbol: %s\n", tmp.symbol);
-            //return NULL;
+            if (sym_find(tmp.symbol) != -1) {
+                /* SYMTAB에서 symbol을 찾으면 error flag */
+                fprintf(stderr, "[ERROR] duplicate symbol: %s\n", tmp.symbol);
+                //return NULL;
+            }
+            else {
+                /* 처음 보는 symbol일 경우 SYMTAB에 추가 */
+                sym_insert(tmp.symbol, LOCCTR);                
+            }
         }
         else {
-            /* 처음 보는 symbol일 경우 SYMTAB에 추가 */
-            sym_insert(tmp.symbol, LOCCTR);                
+            strcpy(tmp.symbol, "");
+            strcpy(tmp.opcode, tmp.token[0]);
+            strcpy(tmp.operand, tmp.token[1]);
+            strcpy(tmp.operand2, tmp.token[2]);
         }
-    }
-    else {
-        strcpy(tmp.symbol, "");
-        strcpy(tmp.opcode, tmp.token[0]);
-        strcpy(tmp.operand, tmp.token[1]);
-    }
 
-    /* opcode format ('1':0, '2':1, '3/4':2) */
-    if (tmp.opcode[0] == '+') {
-        tmp.format = 4;
-    }
-    else {
-        op_node_ptr tmp_op = op_find(tmp.opcode);
-        if (tmp_op != NULL) {
-            tmp.format = tmp_op->format + 1;
+        /* opcode format ('1':0, '2':1, '3/4':2) */
+        if (tmp.opcode[0] == '+') {
+            tmp.format = 4;
+            strcpy(tmp.opcode, tmp.opcode+1);
+        }
+        else {
+            op_node_ptr tmp_op = op_find(tmp.opcode);
+            if (tmp_op != NULL) {
+                tmp.format = tmp_op->format + 1;
+            }
         }
     }
 
@@ -90,6 +111,9 @@ int pass1(char *asm_filename, char *mid_filename) {
     // pass1 수행, 성공하면 program length 리턴, 실패하면 -1 리턴
     int program_len = -1;
     unsigned int start_addr = 0;
+    char statement[MX_STATEMENT_LEN+1];
+    int line_idx = 5;
+    //state_info tmp[500];
     FILE *asm_fp = fopen(asm_filename, "r");
     FILE *mid_fp = fopen(mid_filename, "w");
 
@@ -100,73 +124,107 @@ int pass1(char *asm_filename, char *mid_filename) {
     }
     // (symbol), opcode, operand, + loc, + object_code
 
-    char statement[MX_STATEMENT_LEN+1];
-    int line_idx = 5;
-    state_info tmp;
-
     /* read first input line */
     fgets(statement, sizeof(statement), asm_fp);
-    tmp = get_statement_info(statement);
+    tmp[0] = get_statement_info(statement);
     /* 에러, 변수명 중복 사용*/
     //if (tmp == NULL) {
     //    return -1;
     //}
 
-    if (strcmp(tmp.token[1], "START") == 0) {
+    if (strcmp(tmp[0].token[1], "START") == 0) {
         /*  if OPCODE = 'START', 
             save #[OPERAND] as starting addr, initialize LOCCTR to starting addr
             write line to mid file, read next input line
         */
 
-        LOCCTR = strtol(tmp.token[2], NULL, 16);
+        LOCCTR = strtol(tmp[0].token[2], NULL, 16);
         start_addr = LOCCTR;
-        fprintf(mid_fp, "%04X\t %s\n", LOCCTR, statement);
-        printf("%d %04X %-10s %-10s %-10s\n", 0, LOCCTR, tmp.token[0], tmp.token[1], tmp.token[2]);
+        tmp[0].LOCCTR = LOCCTR;
+        fprintf(mid_fp, "%4d %04X %-10s %-10s %-10s\n", line_idx, tmp[0].LOCCTR, tmp[0].token[0], tmp[0].token[1], tmp[0].token[2]);
     }
     else {
         LOCCTR = 0;
+        tmp[0].LOCCTR = LOCCTR;
     }
 
+    int i = 0;
     while(1) {
+        line_idx += 5;
+        i++;
+
         fgets(statement, sizeof(statement), asm_fp);
-        tmp = get_statement_info(statement);
+        tmp[i] = get_statement_info(statement);
         /* 에러, 변수명 중복 사용*/
         //if (tmp == NULL) {
         //    return -1;
         //}
+        tmp[i].LOCCTR = LOCCTR;
 
-        if (strcmp(tmp.token[0], ".") != 0) {
-            if (strcmp(tmp.opcode, "END") == 0) {
+        if (strcmp(tmp[i].token[0], ".") != 0) {
+            if (strcmp(tmp[i].opcode, "END") == 0) {
+                fprintf(mid_fp, "%4d %4s %-10s %-10s %-10s\n", line_idx, "", tmp[i].symbol, tmp[i].opcode, tmp[i].operand);
                 break;
             }
         
-            printf("%d %04X %-10s %-10s %-10s\n", tmp.format, LOCCTR, tmp.symbol, tmp.opcode, tmp.operand);
+            //printf("%4d %04X %-10s %-10s %-10s\n", line_idx, LOCCTR, tmp.symbol, tmp.opcode, tmp.operand);
 
-            if (strcmp(tmp.opcode, "WORD") == 0) {
+            if (strcmp(tmp[i].opcode, "WORD") == 0) {
+                fprintf(mid_fp, "%4d %04X %-10s %-10s %-10s\n", line_idx, tmp[i].LOCCTR, tmp[i].symbol, tmp[i].opcode, tmp[i].operand);
                 LOCCTR += 3;
             }
-            else if (strcmp(tmp.opcode, "RESW") == 0) {
-                LOCCTR += 3 * strtol(tmp.operand, NULL, 10);
+            else if (strcmp(tmp[i].opcode, "RESW") == 0) {
+                fprintf(mid_fp, "%4d %04X %-10s %-10s %-10s\n", line_idx, tmp[i].LOCCTR, tmp[i].symbol, tmp[i].opcode, tmp[i].operand);
+                LOCCTR += 3 * strtol(tmp[i].operand, NULL, 10);
             }
-            else if (strcmp(tmp.opcode, "RESB") == 0) {
-                LOCCTR += strtol(tmp.operand, NULL, 10);
+            else if (strcmp(tmp[i].opcode, "RESB") == 0) {
+                fprintf(mid_fp, "%4d %04X %-10s %-10s %-10s\n", line_idx, tmp[i].LOCCTR, tmp[i].symbol, tmp[i].opcode, tmp[i].operand);
+                LOCCTR += strtol(tmp[i].operand, NULL, 10);
             }
-            else if (strcmp(tmp.opcode, "BYTE") == 0) {
-                int len = strlen(tmp.operand);
-                if (tmp.operand[0] == 'X') {
+            else if (strcmp(tmp[i].opcode, "BYTE") == 0) {
+                fprintf(mid_fp, "%4d %04X %-10s %-10s %-10s\n", line_idx, tmp[i].LOCCTR, tmp[i].symbol, tmp[i].opcode, tmp[i].operand);
+
+                int len = strlen(tmp[i].operand);
+                if (tmp[i].operand[0] == 'X') {
                     LOCCTR += (len-3)/2;
                 }
-                else if (tmp.operand[0] == 'C') {
+                else if (tmp[i].operand[0] == 'C') {
                     LOCCTR += (len-3);
                 }
             }
-            else if (op_find(tmp.opcode) == NULL && op_find(tmp.opcode+1) == NULL) {
+            else if (op_find(tmp[i].opcode) == NULL) {
                 /* directive의 경우 object code로 변환 x, opcode앞에 '+'붙은 경우도 고려 */
-
+                fprintf(mid_fp, "%4d %4s %-10s %-10s %-10s\n", line_idx, "", tmp[i].symbol, tmp[i].opcode, tmp[i].operand);
             }
             else {
-                LOCCTR += tmp.format;
+                /* 일반적인 opcode의 경우 */
+                if (tmp[i].operand[strlen(tmp[i].operand)-1] == ',') {
+                    fprintf(mid_fp, "%4d %04X %-10s %-10s %-10s %-3s\n", line_idx, tmp[i].LOCCTR, tmp[i].symbol, tmp[i].opcode, tmp[i].operand, tmp[i].operand2);
+                }
+                else {
+                    if (strcmp(tmp[i].opcode, "RSUB") == 0) {
+                        strcpy(tmp[i].operand, "");
+                    }
+
+                    /* format 4 출력 처리 */
+                    if (tmp[i].format == 4) {
+                        char buf[MX_TOKEN_LEN+1];
+
+                        sprintf(buf, "+%s", tmp[i].opcode);
+                        strcpy(tmp[i].opcode, buf);
+                    }
+                    fprintf(mid_fp, "%4d %04X %-10s %-10s %-10s\n", line_idx, tmp[i].LOCCTR, tmp[i].symbol, tmp[i].opcode, tmp[i].operand);
+                    
+                    if (tmp[i].format == 4) {
+                        strcpy(tmp[i].opcode, tmp[i].opcode+1);
+                    }
+                }
+                LOCCTR += tmp[i].format;
             }           
+        }
+        else {
+            /* 주석인 경우 */
+            fprintf(mid_fp, "%4d %4s %-s\n", line_idx, "", tmp[i].statement);
         }
     }
 
@@ -176,4 +234,62 @@ int pass1(char *asm_filename, char *mid_filename) {
     fclose(mid_fp);   
 
     return program_len;
+}
+
+int pass2(char *mid_filename, char *lst_filename, char *obj_filename) {
+    FILE *mid_fp = fopen(mid_filename, "r");
+    FILE *lst_fp = fopen(lst_filename, "w");
+    FILE *obj_fp = fopen(obj_filename, "w");
+
+    int line_idx = 5;
+
+    if (!mid_fp || !lst_fp || !obj_fp) {
+        /* file open error 처리, main 프로그램 종료 */
+        fprintf(stderr, "file open error!\n");
+        return 0;
+    }
+
+    if (strcmp(tmp[0].opcode, "START") == 0) {
+        fprintf(lst_fp, "%4d %04X %-10s %-10s %-10s\n", line_idx, tmp[0].LOCCTR, tmp[0].token[0], tmp[0].token[1], tmp[0].token[2]);
+    }
+    /* write header record */
+    fprintf(obj_fp, "H%-6s%06X%06X\n", tmp[0].token[0], tmp[0].LOCCTR, program_len);
+
+    int i = 0;
+    while (1) {
+        i++;
+        line_idx += 5;
+
+        if (strcmp(tmp[i].opcode, "END") == 0) {
+            fprintf(lst_fp, "%4d %4s %-10s %-10s %-10s\n", line_idx, "", tmp[i].symbol, tmp[i].opcode, tmp[i].operand);
+            break;
+        }
+
+        /* 주석이 아니면 */
+        if (tmp[i].is_comment == 0) {
+            /* optable에 존재하는 opcode이면 */
+            if (op_find(tmp[i].opcode) != NULL) {
+                /* operand가 2개일 경우 */
+                if (tmp[i].operand[strlen(tmp[i].operand)-1] == ',') {
+                    tmp[i].operand[strlen(tmp[i].operand)-1] = '\0';
+                    //printf("%s %s\n", tmp[i].operand, tmp[i].operand2);
+                }
+                //else {
+                //    printf("%s\n", tmp[i].operand);
+                //}
+
+                /* operand에 symbol이 존재할 경우 */
+                if (sym_find(tmp[i].operand) != -1) {
+
+                }
+            }
+        }
+    }
+
+
+    fclose(mid_fp);
+    fclose(lst_fp);   
+    fclose(obj_fp);   
+
+    return -1;
 }
