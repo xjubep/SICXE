@@ -22,5 +22,6 @@ int assemble(char *filename);
 int pass1(char *asm_filename, char *mid_filename);
 int pass2(char *mid_filename, char *lst_filename, char *obj_filename);
 state_info get_statement_info(char *statement);
+int is_register(char *operand);
 
 #endif

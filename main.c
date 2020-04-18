@@ -133,7 +133,7 @@ int main(void) {
         }
         else if (strcmp(cmd[0], "assemble") == 0) {
             /* assemble command를 입력받으면 assemble 함수 호출 */
-            if (cmd_num != 2 || assemble(cmd[1]) == 0) {
+            if (cmd_num != 2 || assemble(cmd[1]) == -1) {
                 /* 잘못된 command가 입력 된 경우이므로 history linked list에서 삭제 */
                 printf("assemble error!\n");
                 pop_back(hi);
