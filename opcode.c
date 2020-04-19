@@ -35,7 +35,8 @@ void op_insert(int value, const char *name, int format) {
     }
 }
 
-/* instruction name과 일치하는 ocpode가 존재하는지 확인하는 함수 */
+/*  instruction name과 일치하는 ocpode가 존재하는지 확인하고 
+    존재하면 해당 opcode의 정보를 알려주는 함수 */
 op_node_ptr op_find(const char *name) {
     int idx = hash(name);
     op_node_ptr cur = table[idx];

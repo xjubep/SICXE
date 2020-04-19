@@ -93,21 +93,4 @@ void sym_clear(void) {
             free(del);
         }
     }
-}          
-
-/*
-void pop_front(List *list) {
-    if (list->size == 1) {
-        free(list->front);
-        list->front = NULL;
-        list->back = NULL;
-    }
-    else {
-        node_ptr del = list->front;
-        list->front = list->front->next;
-        free(del);
-    }
-
-    list->size--;
-}
-*/
+}         
