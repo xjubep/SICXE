@@ -137,6 +137,9 @@ int main(void) {
                 /* 잘못된 command가 입력 된 경우이므로 history linked list에서 삭제 */
                 printf("assemble error!\n");
                 pop_back(hi);
+
+                /* symbol table clear */
+                sym_clear();
             }          
         }
         else if (strcmp(cmd[0], "symbol") == 0) {

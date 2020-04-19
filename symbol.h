@@ -20,5 +20,6 @@ void sym_insert(const char *label, unsigned int LOCCTR); // linked list 기반�
 int sym_find(const char *label);  // label 일치하는 symbol의 LOCCTR 반환하는 함수, 없으면 -1 반환
 int sym_print_all(void);        // 전체 symbol list 출력
 int sym_compare(const void *a, const void *b);  // symbol qsort에 사용되는 비교 함수
+void sym_clear(void);                // symbol hash table 메모리 해제하는 함수
 
 #endif

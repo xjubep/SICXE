@@ -82,3 +82,32 @@ int sym_compare(const void *a, const void *b) {
     sym_node_ptr n2 = *(sym_node_ptr *)b;
     return strcmp(n1->label, n2->label);
 }
+
+/* symbol hash table 메모리 해제하는 함수 */
+void sym_clear(void) {
+    sym_node_ptr del;
+    for (int i = 0; i < TABLE_SIZE; i++) {
+        while (sym_table[i] != NULL) {
+            del = sym_table[i];
+            sym_table[i] = sym_table[i]->next;
+            free(del);
+        }
+    }
+}          
+
+/*
+void pop_front(List *list) {
+    if (list->size == 1) {
+        free(list->front);
+        list->front = NULL;
+        list->back = NULL;
+    }
+    else {
+        node_ptr del = list->front;
+        list->front = list->front->next;
+        free(del);
+    }
+
+    list->size--;
+}
+*/
