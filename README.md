@@ -1,3 +1,3 @@
-compile: "make"
-run: "a.out"
-delete: "make clean"
+* compile: "make"
+* run: "a.out"
+* delete: "make clean"

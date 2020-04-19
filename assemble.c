@@ -80,7 +80,7 @@ state_info get_statement_info(char *statement) {
         /*  첫 번째 토큰이 opcode list에 존재하지 않으면서
             token의 개수가 3개인 경우 symbol이 있는 statement로 간주 */
         if (tmp.token_num == 3 && op_find(tmp.token[0]) == NULL) {
-            // START일 경우에는 symbol에 집어 넣지 않음
+            /* START일 경우에는 symbol에 집어 넣지 않음 */
             if (strcmp(tmp.token[1], "START") == 0)
                 return tmp; 
             strcpy(tmp.symbol, tmp.token[0]);
@@ -150,8 +150,8 @@ int is_register(char *operand) {
         return -1;
 }
 
+/* pass1 수행, 성공: program len, 실패:-1 리턴 */
 int pass1(char *asm_filename, char *mid_filename) {
-    // pass1 수행, 성공하면 program length 리턴, 실패하면 -1 리턴
     int program_len = -1;
     unsigned int start_addr = 0;
     char statement[MX_STATEMENT_LEN+1];
@@ -287,6 +287,7 @@ int pass1(char *asm_filename, char *mid_filename) {
     return program_len;
 }
 
+/* pass2 수행, 성공: 0, 실패:-1 리턴 */
 int pass2(char *mid_filename, char *lst_filename, char *obj_filename) {
     FILE *mid_fp = fopen(mid_filename, "r");
     FILE *lst_fp = fopen(lst_filename, "w");

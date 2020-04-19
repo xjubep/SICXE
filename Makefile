@@ -6,7 +6,7 @@ TARGET=a.out
 all: $(TARGET)
 
 clean:
-	rm -f $(TARGET)
+	rm -f $(TARGET) *.lst *.obj
 
 $(TARGET): $(SOURCES)
 	$(CC) $(CFLAGS) -o $(TARGET) $(SOURCES)
