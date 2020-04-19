@@ -44,6 +44,7 @@ int assemble(char *filename) {
         return -1;
     }
 
+    /* pass2 수행, 성공: 0, 실패:-1 리턴 */
     if (pass2(mid_filename, lst_filename, obj_filename) != 0) {
         return -1;
     }
@@ -150,7 +151,7 @@ int pass1(char *asm_filename, char *mid_filename) {
     if (!asm_fp || !mid_fp) {
         /* file open error 처리, main 프로그램 종료 */
         fprintf(stderr, "file open error!\n");
-        return 0;
+        return -1;
     }
     // (symbol), opcode, operand, + loc, + object_code
 
@@ -278,7 +279,7 @@ int pass2(char *mid_filename, char *lst_filename, char *obj_filename) {
     if (!mid_fp || !lst_fp || !obj_fp) {
         /* file open error 처리, main 프로그램 종료 */
         fprintf(stderr, "file open error!\n");
-        return 0;
+        return -1;
     }
 
     if (strcmp(tmp[0].token[1], "START") == 0) {
@@ -290,7 +291,7 @@ int pass2(char *mid_filename, char *lst_filename, char *obj_filename) {
     text_start_addr = tmp[0].LOCCTR;
 
     int i = 0;
-    char ret[10];
+    //char ret[10];
     char text_record[70];
     strcpy(text_record, "");
 
@@ -298,7 +299,7 @@ int pass2(char *mid_filename, char *lst_filename, char *obj_filename) {
         i++;
         line_idx += 5;
 
-        strcpy(ret, "");
+        strcpy(tmp[i].ret, "");
 
         if (strcmp(tmp[i].opcode, "END") == 0) {
             fprintf(lst_fp, "%4d %4s %-10s %-10s %-10s\n", line_idx, "", tmp[i].symbol, tmp[i].opcode, tmp[i].operand);
@@ -321,7 +322,7 @@ int pass2(char *mid_filename, char *lst_filename, char *obj_filename) {
                 if (sym != -1 || tmp[i].operand[0] == '#' || tmp[i].operand[0] == '@'
                     || is_register(tmp[i].operand) != -1 || strcmp(tmp[i].opcode, "RSUB") == 0) {
                     if (tmp[i].format == 1) {
-                        sprintf(ret, "%02X", cur->value);
+                        sprintf(tmp[i].ret, "%02X", cur->value);
                     }
                     else if (tmp[i].format == 2) {
                         int reg1, reg2;
@@ -330,19 +331,19 @@ int pass2(char *mid_filename, char *lst_filename, char *obj_filename) {
                         if (strcmp(tmp[i].operand, "") == 0) {
                             reg1 = 0;
                             reg2 = 0;
-                            sprintf(ret, "%02X%01X%01X", cur->value, reg1, reg2);
+                            sprintf(tmp[i].ret, "%02X%01X%01X", cur->value, reg1, reg2);
                         }
                         /* register의 개수가 1개 */
                         else if (strcmp(tmp[i].operand2, "") == 0) {
                             reg1 = is_register(tmp[i].operand);
                             reg2 = 0;
-                            sprintf(ret, "%02X%01X%01X", cur->value, reg1, reg2);
+                            sprintf(tmp[i].ret, "%02X%01X%01X", cur->value, reg1, reg2);
                         }
                         /* register의 개수가 2개 */
                         else {
                             reg1 = is_register(tmp[i].operand);
                             reg2 = is_register(tmp[i].operand2);
-                            sprintf(ret, "%02X%01X%01X", cur->value, reg1, reg2);
+                            sprintf(tmp[i].ret, "%02X%01X%01X", cur->value, reg1, reg2);
                         }
                     }
                     else if (tmp[i].format == 3) {
@@ -404,7 +405,7 @@ int pass2(char *mid_filename, char *lst_filename, char *obj_filename) {
                             disp = 0;
                         }
 
-                        sprintf(ret, "%02X%01X%03X", cur->value+N*2+I, X*8+B*4+P*2+E, disp);
+                        sprintf(tmp[i].ret, "%02X%01X%03X", cur->value+N*2+I, X*8+B*4+P*2+E, disp);
 
                     }
                     else if (tmp[i].format == 4) {
@@ -453,45 +454,45 @@ int pass2(char *mid_filename, char *lst_filename, char *obj_filename) {
                             strcpy(tmp[i].opcode, buf);
                         }
 
-                        sprintf(ret, "%02X%01X%05X", cur->value+N*2+I, X*8+B*4+P*2+E, addr);
+                        sprintf(tmp[i].ret, "%02X%01X%05X", cur->value+N*2+I, X*8+B*4+P*2+E, addr);
                     }
                     /* operand가 1개인 경우 출력 */
                     if (strcmp(tmp[i].operand2, "") == 0) {
                         fprintf(lst_fp, "%4d %04X %-10s %-10s %-10s %-10s\n", 
-                        line_idx, tmp[i].LOCCTR, tmp[i].symbol, tmp[i].opcode, tmp[i].operand, ret);
+                        line_idx, tmp[i].LOCCTR, tmp[i].symbol, tmp[i].opcode, tmp[i].operand, tmp[i].ret);
                     }
                     /* operand가 2개인 경우 출력 */
                     else {
                         strcat(tmp[i].operand, ", ");
                         strcat(tmp[i].operand, tmp[i].operand2);
                         fprintf(lst_fp, "%4d %04X %-10s %-10s %-10s %-10s\n", 
-                        line_idx, tmp[i].LOCCTR, tmp[i].symbol, tmp[i].opcode, tmp[i].operand, ret);
+                        line_idx, tmp[i].LOCCTR, tmp[i].symbol, tmp[i].opcode, tmp[i].operand, tmp[i].ret);
                     }
                 }
                 else {
                     /* symbol이 존재하지 않는 경우 (undefined symbol) */
                     fprintf(stderr, "line %4d: undefined symbol\n", line_idx);
-                    //return -1;
+                    return -1;
                 }
             }
             else if (strcmp(tmp[i].opcode, "BYTE") == 0) {
                 if (tmp[i].operand[0] == 'C') {
-                    strcpy(ret, "");
+                    strcpy(tmp[i].ret, "");
                     int len = strlen(tmp[i].operand);
                     for (int j = 2; j < len-1; j++) {
                         char buf[10];
                         //printf("%02X", (int)tmp[i].operand[j]);
                         sprintf(buf, "%02X", (int)tmp[i].operand[j]);
-                        strcat(ret, buf);
+                        strcat(tmp[i].ret, buf);
                     }
                 }
                 else if (tmp[i].operand[0] == 'X') {
                     int len = strlen(tmp[i].operand);
-                    strncpy(ret, tmp[i].operand+2, len-3);
-                    ret[len-3] = '\0';
+                    strncpy(tmp[i].ret, tmp[i].operand+2, len-3);
+                    tmp[i].ret[len-3] = '\0';
                 }
 
-                fprintf(lst_fp, "%4d %04X %-10s %-10s %-10s %-10s\n", line_idx, tmp[i].LOCCTR, tmp[i].symbol, tmp[i].opcode, tmp[i].operand, ret);
+                fprintf(lst_fp, "%4d %04X %-10s %-10s %-10s %-10s\n", line_idx, tmp[i].LOCCTR, tmp[i].symbol, tmp[i].opcode, tmp[i].operand, tmp[i].ret);
             }
             else if (strcmp(tmp[i].opcode, "WORD") == 0) {
                 fprintf(lst_fp, "%4d %04X %-10s %-10s %-10s\n", line_idx, tmp[i].LOCCTR, tmp[i].symbol, tmp[i].opcode, tmp[i].operand);
@@ -510,12 +511,13 @@ int pass2(char *mid_filename, char *lst_filename, char *obj_filename) {
             /* T 레코드에 처리 부분*/
             int text_len = strlen(text_record);
             
-            if (text_len + strlen(ret) > 60 || (op_find(tmp[i].opcode) == NULL && op_find(tmp[i-1].opcode) == NULL)) {
-                fprintf(obj_fp, "T%06X%02X%s\n", text_start_addr, text_len/2, text_record);
+            if (text_len + strlen(tmp[i].ret) > 60 || (strcmp(tmp[i].ret, "") == 0 && strcmp(tmp[i-1].ret, "") == 0)) {
+                if (strcmp(text_record, "") != 0)
+                    fprintf(obj_fp, "T%06X%02X%s\n", text_start_addr, text_len/2, text_record);
                 strcpy(text_record, "");
                 text_start_addr = tmp[i].LOCCTR;
             }
-            strcat(text_record, ret);
+            strcat(text_record, tmp[i].ret);
 
 
         }
@@ -525,7 +527,25 @@ int pass2(char *mid_filename, char *lst_filename, char *obj_filename) {
         }
     }
 
+    /* 마지막 T 레코드 출력 */
+    int text_len = strlen(text_record);
+    fprintf(obj_fp, "T%06X%02X%s\n", text_start_addr, text_len/2, text_record);
+
+    /* M 레코드 출력 */
+    i = 0;
+    while (1) {
+        i++;
+
+        if (strcmp(tmp[i].opcode, "END") == 0)
+            break;
+        
+        if (tmp[i].format == 4 && tmp[i].operand[0] != '#') {
+            fprintf(obj_fp, "M%06X%02X\n", tmp[i].LOCCTR+1, 5);
+        }
+    }
+
     /* End 레코드 처리 부분 */
+    fprintf(obj_fp, "E%06X\n", tmp[0].LOCCTR);
 
     fclose(mid_fp);
     fclose(lst_fp);   

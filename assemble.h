@@ -16,6 +16,7 @@ typedef struct statement_info {
     char operand[MX_TOKEN_LEN+1];
     char operand2[MX_TOKEN_LEN+1];
     char statement[MX_STATEMENT_LEN+1];
+    char ret[10];
 } state_info;
 
 int assemble(char *filename);
