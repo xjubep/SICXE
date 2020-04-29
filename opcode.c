@@ -52,7 +52,8 @@ op_node_ptr op_find(const char *name) {
 
 /* 전체 opcodelist 출력 */
 void op_print_all(void) {
-    for (int i = 0; i < TABLE_SIZE; i++) {
+    int i;
+    for (i = 0; i < TABLE_SIZE; i++) {
         if (table[i] != NULL) {
             printf("%2d: ", i);
             op_node_ptr cur = table[i];

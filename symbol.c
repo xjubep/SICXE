@@ -51,8 +51,9 @@ int sym_find(const char *label) {
 int sym_print_all(void) {
     sym_node_ptr all_list[1000];
     int cnt = 0;
+    int i;
 
-    for (int i = 0; i < TABLE_SIZE; i++) {
+    for (i = 0; i < TABLE_SIZE; i++) {
         if (sym_table[i] != NULL) {
             sym_node_ptr cur = sym_table[i];
 
@@ -70,7 +71,7 @@ int sym_print_all(void) {
         }
     }
     qsort(all_list, cnt, sizeof(sym_node_ptr), sym_compare);
-    for (int i = 0; i < cnt; i++) {
+    for (i = 0; i < cnt; i++) {
         printf("%7s %-10s %04X\n", "", all_list[i]->label, all_list[i]->LOCCTR);
     }
     return 1;
@@ -86,7 +87,9 @@ int sym_compare(const void *a, const void *b) {
 /* symbol hash table 메모리 해제하는 함수 */
 void sym_clear(void) {
     sym_node_ptr del;
-    for (int i = 0; i < TABLE_SIZE; i++) {
+    int i;
+
+    for (i = 0; i < TABLE_SIZE; i++) {
         while (sym_table[i] != NULL) {
             del = sym_table[i];
             sym_table[i] = sym_table[i]->next;

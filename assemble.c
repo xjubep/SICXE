@@ -296,6 +296,7 @@ int pass2(char *mid_filename, char *lst_filename, char *obj_filename) {
     int line_idx = 5;
     int base = 0;
     int i = 0;
+    int j;
     int text_start_addr;
     char text_record[70];
     strcpy(text_record, "");
@@ -518,7 +519,7 @@ int pass2(char *mid_filename, char *lst_filename, char *obj_filename) {
                 if (tmp[i].operand[0] == 'C') {
                     strcpy(tmp[i].ret, "");
                     int len = strlen(tmp[i].operand);
-                    for (int j = 2; j < len-1; j++) {
+                    for (j = 2; j < len-1; j++) {
                         char buf[10];
                         //printf("%02X", (int)tmp[i].operand[j]);
                         sprintf(buf, "%02X", (int)tmp[i].operand[j]);

@@ -6,7 +6,8 @@
 unsigned int dump0_idx = 0x00000;   // parameter가 없는 dump 명령어에서 위치 저장을 위해 사용
 
 int dump(int cmd_num, char* s, char* e) {
-    unsigned int start, end, tmp_start, tmp_end;
+    unsigned int start, end, tmp_start, tmp_end, addr;
+    int i;
 
     if (cmd_num == 1) {
         /* parameter의 개수가 0인 경우, dump 제외 */
@@ -45,17 +46,17 @@ int dump(int cmd_num, char* s, char* e) {
     if (tmp_end > 0xFFFFF)
         tmp_end = 0xFFFFF;
 
-    for (unsigned int addr = tmp_start; addr < tmp_end; addr += 16) {
+    for (addr = tmp_start; addr < tmp_end; addr += 16) {
         printf("%05X ", addr);
 
-        for (int i = 0; i < 16; i++) {
+        for (i = 0; i < 16; i++) {
             if (addr+i < start || addr+i > end)
                 printf("   ");
             else
                 printf("%02X ", mem[addr + i]);
         }
         printf("; ");
-        for (int i = 0; i < 16; i++) {
+        for (i = 0; i < 16; i++) {
             if (addr+i < start || addr+i > end)
                 printf(".");
             else {
@@ -78,7 +79,7 @@ int edit(char* a, char* v) {
     unsigned int val = strtoul(v, NULL, 16);
 
     /* value 값이 범위를 벗어난 경우 error 처리 */
-    if (val < 0x20 || val > 0x7E)
+    if (val > 0xFF)
         return 0;
 
     /* address 값이 범위를 벗어난 경우 error 처리 */
@@ -96,9 +97,10 @@ int fill(char* s, char *e, char *v) {
     unsigned int start = strtoul(s, NULL, 16);
     unsigned int end = strtoul(e, NULL, 16);
     unsigned int val = strtoul(v, NULL, 16);
+    unsigned int addr;
 
     /* value 값이 범위를 벗어난 경우 error 처리 */
-    if (val < 0x20 || val > 0x7E)
+    if (val > 0xFF)
         return 0;
 
     /* start 주소값이 메모리 범위를 벗어난 경우 error 처리 (false) */
@@ -109,7 +111,7 @@ int fill(char* s, char *e, char *v) {
     if (start > end) 
         return 0;     
 
-    for (unsigned int addr = start; addr <= end; addr++) {
+    for (addr = start; addr <= end; addr++) {
         /* address 값이 범위를 벗어난 경우 error 처리 */
         if (addr > 0xFFFFF) 
             return 0;         

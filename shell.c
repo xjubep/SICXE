@@ -32,6 +32,7 @@ void dir(void) {
     struct dirent **namelist;   // 파일 목록이 저장될 변수
     int count;                  // scandir 함수의 리턴 값을 저장하는 변수
     char *path = ".";           // 파일 목록을 얻을 디렉토리에 대한 경로를 현재 경로(.)로 설정
+    int i;
 
     /*  
         scandir 함수: 
@@ -47,7 +48,7 @@ void dir(void) {
     }
 
     /* '.'과 '..'은 표시하지 않기 index 2 부터 시작 */
-    for (int i = 2; i < count; i++) {
+    for (i = 2; i < count; i++) {
         char tmp_name[26];  // 파일 이름이 임시로 저장되는 변수
         struct stat sb;     // 파일 정보를 저장하는 구조체
 
@@ -65,7 +66,7 @@ void dir(void) {
     }
     
     /* namelist 메모리 해제 */
-    for (int i = 0; i < count; i++)
+    for (i = 0; i < count; i++)
         free(namelist[i]);
     free(namelist);
 

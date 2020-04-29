@@ -12,6 +12,7 @@ int main(void) {
     char cmd_line[4*MX_CMD_LEN];    // 명령어 한 줄 전체를 저장하는 변수
     char cmd[4][MX_CMD_LEN];        // 명령어를 파싱한 후 각각 저장하는 변수
     int cmd_num;                    // 파싱된 명령어의 개수 (ex. dump 14, 37 -> cmd_num=3)
+    int i;
 
     /* history 관련 변수들 초기화 */
     List *hi = (List *)malloc(sizeof(List));    // history를 관리하는 linked list
@@ -76,7 +77,7 @@ int main(void) {
         else if (strcmp(cmd[0], "hi") == 0 || strcmp(cmd[0], "history") == 0) {
             /* history command를 입력받으면 history linked list를 순회 */
             node_ptr his_cur = hi->front;
-            for (int i = 0; i < hi->size; i++) {
+            for (i = 0; i < hi->size; i++) {
                 printf("%5d %s", i+1, his_cur->data);
                 his_cur = his_cur->next;
             }
