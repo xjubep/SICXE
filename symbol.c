@@ -97,3 +97,49 @@ void sym_clear(void) {
         }
     }
 }         
+
+/* linked list 기반의 hash table에 symbol를 삽입하는 함수 */
+void es_insert(const char *label, unsigned int address) {
+    sym_node_ptr new_node = (sym_node_ptr)malloc(sizeof(SYM_NODE));
+
+    strcpy(new_node->label, label);
+    new_node->LOCCTR = address;
+    new_node->next = NULL;
+
+    int idx = sym_hash(label);   
+
+    if (es_table[idx] == NULL)
+        es_table[idx] = new_node;
+    else {        
+        new_node->next = es_table[idx];
+        es_table[idx] = new_node;
+    }
+}
+
+/* label 일치하는 estab의 address 반환하는 함수, 없으면 -1 반환 */
+int es_find(const char *label) {
+    int idx = sym_hash(label);
+    sym_node_ptr cur = es_table[idx];
+
+    while (cur != NULL) {
+        if (strcmp(cur->label, label) == 0) {
+            return cur->LOCCTR;
+        }
+        cur = cur->next;
+    }
+    return -1;
+}
+
+/* estab 메모리 해제하는 함수 */
+void es_clear(void) {
+    sym_node_ptr del;
+    int i;
+
+    for (i = 0; i < TABLE_SIZE; i++) {
+        while (es_table[i] != NULL) {
+            del = es_table[i];
+            es_table[i] = es_table[i]->next;
+            free(del);
+        }
+    }
+}                

@@ -7,6 +7,10 @@
 #include "memory.h"
 #include "assemble.h"
 #include "symbol.h"
+#include "load.h"
+#include "run.h"
+
+unsigned int PROGADDR = 0x0000;       // sicsim 시작 후 progaddr의 default값
 
 int main(void) {
     char cmd_line[4*MX_CMD_LEN];    // 명령어 한 줄 전체를 저장하는 변수
@@ -150,6 +154,33 @@ int main(void) {
                 printf("symbol error!\n");
                 pop_back(hi);
             }          
+        }
+        else if (strcmp(cmd[0], "progaddr") == 0) {
+            /* progaddr command를 입력받은 경우 */
+            if (cmd_num != 2 || strtoul(cmd[1], NULL, 16) > 0xFFFF) {
+                /* 잘못된 command가 입력 된 경우이므로 history linked list에서 삭제 */
+                printf("progaddr error!\n");
+                pop_back(hi);
+            }
+            else {
+                PROGADDR = strtoul(cmd[1], NULL, 16);
+            }
+        }
+        else if (strcmp(cmd[0], "loader") == 0) {
+            /* loader command를 입력받으면 loader 함수 호출 */
+            if (loader(cmd_num, cmd[1], cmd[2], cmd[3], PROGADDR) == -1) {
+                /* 잘못된 command가 입력 된 경우이므로 history linked list에서 삭제 */
+                printf("loader error!\n");
+                pop_back(hi);
+            }
+        }
+        else if (strcmp(cmd[0], "bp") == 0) {
+            /* bp command를 입력받으면 bp 함수 호출 */
+            if (bp(cmd_num, cmd[1]) == -1) {
+                /* 잘못된 command가 입력 된 경우이므로 history linked list에서 삭제 */
+                printf("bp error!\n");
+                pop_back(hi);
+            }
         }
         else {
             /* 정의되지 않은 command가 입력된 경우이므로 history linked list에서 삭제 */

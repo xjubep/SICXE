@@ -9,4 +9,6 @@ int edit(char* addr, char* val);                // 메모리 addr 번지의 값�
 int fill(char* start, char* end, char* val);    // 메모리 start 번지부터 end 번지까지의 값을 val 값으로 fill하는 함수
 void reset(void);                               // 메모리 전체를 전부 0으로 변경하는 함수
 
+int edit_uint(unsigned int addr, unsigned int val); // parameter가 uint인 edit 함수
+
 #endif

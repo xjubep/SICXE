@@ -125,3 +125,20 @@ int fill(char* s, char *e, char *v) {
 void reset(void) {
     memset(mem, 0, sizeof(mem));
 }
+
+/* 메모리 addr 번지의 값을 val 값으로 edit하는 함수 
+    - parameter가 unsigned int */
+int edit_uint(unsigned int addr, unsigned int val) {
+    /* value 값이 범위를 벗어난 경우 error 처리 */
+    if (val > 0xFF)
+        return 0;
+
+    /* address 값이 범위를 벗어난 경우 error 처리 */
+    if (addr > 0xFFFFF)
+        return 0;
+
+    mem[addr] = (char)val;
+
+    /* edit 성공 후 1(true) 리턴 */
+    return 1;
+}
