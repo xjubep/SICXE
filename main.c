@@ -29,6 +29,12 @@ int main(void) {
     int tmp_value;                              // opcode value 저장 ('18 ADD 3/4' 에서 '18)
     char tmp_name[7], tmp_format[4];            // instruction name, format 저장 ('ADD', '3/4')
 
+    /* bp 관련 변수들 초기화 */
+    BP_List *bl = (BP_List *)malloc(sizeof(BP_List));   // bp를 관리하는 linked list;
+    bl->size = 0;                                       // bp linked list의 size 초기화
+    bl->front = NULL;                                   // bp linked list의 front 초기화
+    bl->back = NULL;                                    // bp linked list의 back 초기화
+
     if (!fp) {
         /* file open error 처리, main 프로그램 종료 */
         fprintf(stderr, "opcode file open error!\n");
@@ -176,9 +182,17 @@ int main(void) {
         }
         else if (strcmp(cmd[0], "bp") == 0) {
             /* bp command를 입력받으면 bp 함수 호출 */
-            if (bp(cmd_num, cmd[1]) == -1) {
+            if (bp(cmd_num, cmd[1], bl) == -1) {
                 /* 잘못된 command가 입력 된 경우이므로 history linked list에서 삭제 */
                 printf("bp error!\n");
+                pop_back(hi);
+            }
+        }
+        else if (strcmp(cmd[0], "run") == 0) {
+            /* run command를 입력받으면 run 함수 호출 */
+            if (cmd_num != 1 || run(bl) == -1) {
+                /* 잘못된 command가 입력 된 경우이므로 history linked list에서 삭제 */
+                printf("run error!\n");
                 pop_back(hi);
             }
         }
