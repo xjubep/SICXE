@@ -35,6 +35,9 @@ int main(void) {
     bl->front = NULL;                                   // bp linked list의 front 초기화
     bl->back = NULL;                                    // bp linked list의 back 초기화
 
+    /* register */
+    REG reg;
+
     if (!fp) {
         /* file open error 처리, main 프로그램 종료 */
         fprintf(stderr, "opcode file open error!\n");
@@ -190,7 +193,7 @@ int main(void) {
         }
         else if (strcmp(cmd[0], "run") == 0) {
             /* run command를 입력받으면 run 함수 호출 */
-            if (cmd_num != 1 || run(bl) == -1) {
+            if (cmd_num != 1 || run(bl, &reg, PROGADDR) == -1) {
                 /* 잘못된 command가 입력 된 경우이므로 history linked list에서 삭제 */
                 printf("run error!\n");
                 pop_back(hi);
